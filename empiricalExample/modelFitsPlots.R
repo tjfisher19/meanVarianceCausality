@@ -11,6 +11,7 @@ library(lubridate)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(WeightedPortTest)
 
 #### Load data and process
 data.sp500 <- read.csv("YAHOO-INDEX_GSPC.csv")
@@ -167,7 +168,7 @@ p.sp500.res <- ggplot(sp500.res.data, aes(resid)) +
   stat_function(fun=dsged, colour="black", linetype=2, size=1.25,
                 args=list(mean=-0.01490927, sd=0.99731078, nu=1.58947645, xi=0.91475410)) +
   scale_x_continuous(limits=c(-4,4)) + 
-  labs(x="S&P 500 Redisuals", y="Density") +
+  labs(x="S&P 500 Residuals", y="Density") +
   theme_bw() +
   theme(axis.line=element_line(size=1, colour="black"),
         axis.text = element_text(colour="gray20"),
@@ -190,7 +191,7 @@ p.eur.res <- ggplot(eur.res.data, aes(resid)) +
   stat_function(fun=dsged, colour="black", linetype=2, size=1.25,
                 args=list(mean=-0.003652755, sd=0.996272884, nu=1.402415848, xi=0.949465498) ) +
   scale_x_continuous(limits=c(-4,4)) + 
-  labs(x="EUR/USD Redisuals", y="Density") +
+  labs(x="EUR/USD Residuals", y="Density") +
   theme_bw() +
   theme(axis.line=element_line(size=1, colour="black"),
         axis.text = element_text(colour="gray20"),
