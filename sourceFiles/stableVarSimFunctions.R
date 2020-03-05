@@ -42,9 +42,9 @@ generateStableVarData <- function(n=100) {
   ### specify the innovations, so the Signma paramter is never used.
   ### These are the values from the VAR though
   Sigma <- matrix(c(9.2886e-05, -6.61129e-05, -6.61129e-05,2.9549e-05), nrow=2,ncol=2)
-  X <- new.varima.sim(phi=Phi, innovations=Innov, sigma=Sigma, n=n)
-  x1 <- X[,1]
-  x2 <- X[,2]
+  X <- varima.sim(model=list(ar=Phi), innov=Innov, k=ncol(Innov), n=(n+100), sigma=Sigma )
+  x1 <- X[-(1:100),1]
+  x2 <- X[-(1:100),2]
   list(x1=x1, x2=x2)
 }
 
@@ -260,7 +260,8 @@ one.iteration.stable.var.boot <- function(var.fit, spec1, spec2, model1, model2,
     Phi <- aperm(var.fit$ar, c(2,3,1))
     ##  As before, the sigma is not used because we specify the errors
     ## which follow our GARCH processes
-    X <- new.varima.sim(phi=Phi, innovations=Innov, sigma=var.fit$var.pred, n=n)
+    X <- varima.sim(model=list(ar=Phi), innov=Innov, n=(n+100), k=ncol(Innov), sigma=var.fit$var.pred )
+    X <- X[-(1:100),]
     fit <- ar(X, aic=FALSE, order.max=p)
     resid <- fit$resid
     x1 <- resid[-(1:p),1]   # Remove the NAs...
@@ -310,7 +311,8 @@ one.iteration.stable.var.boot <- function(var.fit, spec1, spec2, model1, model2,
     Innov <- cbind(x1, x2)
     p <- 4
     Phi <- aperm(var.fit$ar, c(2,3,1))
-    X <- new.varima.sim(phi=Phi, innovations=Innov, sigma=var.fit$var.pred, n=n)
+    X <- varima.sim(model=list(ar=Phi), innov=Innov, n=(n+100), k=ncol(Innov), sigma=var.fit$var.pred )
+    X <- X[-(1:100),]
     fit <- ar(X, aic=FALSE, order.max=p)
     resid <- fit$resid
     x1 <- resid[-(1:p),1]   # Remove the NAs...

@@ -50,12 +50,19 @@ generateData <- function(n=100, alternative=0) {
   ## 
   ## These parameters are based off the GARCH model fit in Tol (1996)
   ## These are based on meterological series in De Bilt, Holland summer series
+  # spec1 <- ugarchspec(variance.model=list(model="sGARCH", garchOrder=c(1,1)),
+  #                     mean.model=list(armaOrder=c(1,1), include.mean=FALSE),
+  #                     fixed.pars=list(omega=0.1, alpha1=0.4, beta1=0.15, ar1=-0.5, ma1=0.3) )
+  # spec2 <- ugarchspec(variance.model=list(model="sGARCH", garchOrder=c(1,1)),
+  #                     mean.model=list(armaOrder=c(1,1), include.mean=FALSE),
+  #                     fixed.pars=list(omega=0.1, alpha1=0.4, beta1=0.15, ar1=-0.5, ma1=0.3) )
+  
   spec1 <- ugarchspec(variance.model=list(model="sGARCH", garchOrder=c(1,1)),
                       mean.model=list(armaOrder=c(1,1), include.mean=FALSE),
-                      fixed.pars=list(omega=0.1, alpha1=0.4, beta1=0.15, ar1=-0.5, ma1=0.3) )
+                      fixed.pars=list(omega=0.1, alpha1=0.1, beta1=0.75, ar1=-0.5, ma1=0.3) )
   spec2 <- ugarchspec(variance.model=list(model="sGARCH", garchOrder=c(1,1)),
                       mean.model=list(armaOrder=c(1,1), include.mean=FALSE),
-                      fixed.pars=list(omega=0.1, alpha1=0.4, beta1=0.15, ar1=-0.5, ma1=0.3) )
+                      fixed.pars=list(omega=0.1, alpha1=0.1, beta1=0.75, ar1=-0.5, ma1=0.3) )
 
   path.sgarch1 <- ugarchpath(spec1, n.sim=n, n.start=(N-n), m.sim=1, startMethod="sample", custom.dist=list(name="sample", distfit=matrix(a1t, ncol=1)) )
   path.sgarch2 <- ugarchpath(spec2, n.sim=n, n.start=(N-n), m.sim=1, startMethod="sample", custom.dist=list(name="sample", distfit=matrix(a2t, ncol=1)) )
@@ -85,7 +92,7 @@ do.one.simulation <- function(cluster=NULL, n=100, M=5, alternative=FALSE, boot.
   #############
   ## Some counting so we know we are making progress
   counter <<- counter + 1
-  if(counter%%5==0) {
+  if(counter%%10==0) {
     time <- (proc.time()-ptm)[3]
     cat(counter, "  ", time, "\n", file=status.file, append=TRUE)
   }

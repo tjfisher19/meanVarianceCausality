@@ -29,10 +29,10 @@ generateVARData <- function(n=100, alternative=0) {
   ## These are based on meterological series in De Bilt, Holland summer series
   spec1 <- ugarchspec(variance.model=list(model="sGARCH", garchOrder=c(1,1)),
                       mean.model=list(armaOrder=c(1,1), include.mean=FALSE),
-                      fixed.pars=list(omega=0.1, alpha1=0.4, beta1=0.15, ar1=-0.5, ma1=0.3) )
+                      fixed.pars=list(omega=0.1, alpha1=0.1, beta1=0.75, ar1=-0.5, ma1=0.3) )
   spec2 <- ugarchspec(variance.model=list(model="sGARCH", garchOrder=c(1,1)),
                       mean.model=list(armaOrder=c(1,1), include.mean=FALSE),
-                      fixed.pars=list(omega=0.1, alpha1=0.4, beta1=0.15, ar1=-0.5, ma1=0.3) )
+                      fixed.pars=list(omega=0.1, alpha1=0.1, beta1=0.75, ar1=-0.5, ma1=0.3) )
 
   path.sgarch1 <- ugarchpath(spec1, n.sim=n, n.start=(N-n), m.sim=1, startMethod="sample", custom.dist=list(name="sample", distfit=matrix(a1t, ncol=1)) )
   path.sgarch2 <- ugarchpath(spec2, n.sim=n, n.start=(N-n), m.sim=1, startMethod="sample", custom.dist=list(name="sample", distfit=matrix(a2t, ncol=1)) )
@@ -57,7 +57,7 @@ do.one.var.simulation <- function(cluster=NULL, n=100, M=5, alternative=FALSE, b
   #############
   ## Some counting so we know we are making progress
   counter <<- counter + 1
-  if(counter%%5==0) {
+  if(counter%%10==0) {
     time <- (proc.time()-ptm)[3]
     cat(counter, "  ", time, "\n", file=status.file, append=TRUE)
   }
@@ -252,11 +252,13 @@ do.one.var.simulation <- function(cluster=NULL, n=100, M=5, alternative=FALSE, b
 ## We are always generating data under the null distro so the
 ## two series are uncorrelated
 one.iteration.var.boot <- function(var.fit, spec1, spec2, model1, model2, n, M, one.way="no") {
+
   N <- n+1000+100
   sub.counter <<- sub.counter + 1;
   ### Generate data fom the specied models
   path.sgarch1 <- try(ugarchpath(spec1, n.sim=(n+100), n.start=(N-n-100), m.sim=1))
   path.sgarch2 <- try(ugarchpath(spec2, n.sim=(n+100), n.start=(N-n-100), m.sim=1))
+
   ### occassionally we get an error here, so just retry
   while(inherits(path.sgarch1, "try-error") || inherits(path.sgarch2, "try-error")) {
     cat(counter, ":", sub.counter, ": Generation error\n", append=TRUE, file=error.file)
@@ -268,13 +270,14 @@ one.iteration.var.boot <- function(var.fit, spec1, spec2, model1, model2, n, M, 
   ## Data is generated...
   x1 <- as.vector(path.sgarch1@path$seriesSim)    ## GARCH part, the "errors" in the VAR...
   x2 <- as.vector(path.sgarch2@path$seriesSim)    ## of length n+100... need extra to generate VAR
-  
+
   Innov <- cbind(x1, x2)
   p <- var.fit$order
 
   if(p > 0) {  
     Phi <- aperm(var.fit$ar, c(2,3,1))
-    X <- new.varima.sim(phi=Phi, innovations=Innov, sigma=var.fit$var.pred, n=n)
+    X <- varima.sim(model=list(ar=Phi), k=ncol(Innov), innov=Innov, n=(n+100) )
+    X <- X[-(1:100),]
     fit <- ar(X, aic=FALSE, order.max=p)
     resid <- fit$resid
     x1 <- resid[-(1:p),1]   # Remove the NAs...
@@ -284,7 +287,7 @@ one.iteration.var.boot <- function(var.fit, spec1, spec2, model1, model2, n, M, 
     x1 <- resid[,1]
     x2 <- resid[,2]
   }
-  
+
   ##
   ## Fit with the correct models. Much like in the above, for smaller n
   ## we run into computational issues on occasion.
@@ -311,7 +314,8 @@ one.iteration.var.boot <- function(var.fit, spec1, spec2, model1, model2, n, M, 
     
     if(p > 0) {  
       Phi <- aperm(var.fit$ar, c(2,3,1))
-      X <- new.varima.sim(phi=Phi, innovations=Innov, sigma=var.fit$var.pred, n=n)
+      X <- varima.sim(model=list(ar=Phi), k=ncol(Innov), innov=Innov, n=(n+100))
+      X <- X[-(1:100),]
       fit <- ar(X, aic=FALSE, order.max=p)
       resid <- fit$resid
       x1 <- resid[-(1:p),1]   # Remove the NAs...
