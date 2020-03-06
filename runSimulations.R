@@ -36,33 +36,32 @@ source("sourceFiles/stableNullSimFunctions.R")
 source("sourceFiles/stableVarSimFunctions.R")
 source("sourceFiles/sizeDetermineSimFunctions.R")
 
-num.nodes <- 11;
-run.times <- 10000
+num.nodes <- 10;
+run.times <- 1000
 boot.run <- 1000
 error.file <- paste("outErrors.txt")
 status.file <- paste("outStatus.txt")
 
-library(snow)
+library(parallel)
 options(width=120);
 
-cl <- makeSOCKcluster(spec=num.nodes, names=rep("localhost", num.nodes) );
+cl <- makePSOCKcluster(spec=num.nodes, names=rep("localhost", num.nodes) );
 
-checkCluster(cl);
-clusterSetupRNG(cl, seed=rep(22681, 6) );
+clusterSetRNGStream(cl=cl, iseed=22681)
 
 library(fGarch)
-# library(rugarch)
+library(rugarch)
 library(portes)
 library(forecast)
 
 invisible(clusterEvalQ(cl, library(fGarch)));
-# invisible(clusterEvalQ(cl, library(rugarch)));
+invisible(clusterEvalQ(cl, library(rugarch)));
 invisible(clusterEvalQ(cl, library(portes)));
 invisible(clusterEvalQ(cl, library(forecast)));
 clusterExport(cl, ls() );
 
-
-clusterSetupRNG(cl, seed=rep(41682, 6) );
+clusterSetRNGStream(cl=cl, iseed=41682)
+# clusterSetupRNG(cl, seed=rep(41682, 6) );
 cat("Run Status\n*************************\n", file=status.file)
 cat("Error Status\n************************\n", file=error.file)
 counter <- 0
@@ -77,6 +76,7 @@ clusterExport(cl, ls() )
 # ptm <- proc.time()
 # set.seed(41682)   ## Set local RNG
 # clusterSetupRNG(cl, seed=rep(41682, 6) );  ## Set cluster RNG
+# clusterSetRNGStream(cl=cl, iseed=41682)
 # out <- simEmpiricalTrivialSize(cluster=cl, n=50, M=c(4,10), run.times=run.times, boot.runs=boot.run)
 # out <- 100*out
 # out
@@ -93,8 +93,8 @@ clusterExport(cl, ls() )
 ############################################################
 # counter <- 0
 # ptm <- proc.time()
-# set.seed(41682)   ## Set local RNG
-# clusterSetupRNG(cl, seed=rep(41682, 6) );  ## Set cluster RNG
+# set.seed(22681)   ## Set local RNG
+# clusterSetRNGStream(cl=cl, iseed=22681)
 # out <- simEmpiricalSize(cluster=cl, n=100, M=c(5,8), run.times=run.times, boot.runs=boot.run, alternative=0)
 # out <- 100*out
 # out
@@ -102,13 +102,13 @@ clusterExport(cl, ls() )
 # print(proc.time()-ptm)
 ### > print(proc.time()-ptm)
 ### user    system   elapsed 
-### 275.406     3.824 19027.922
+### 213.341     4.072 15329.885 
 
 
 # counter <- 0
 # ptm <- proc.time()
 # set.seed(22681)   ## Set local RNG
-# clusterSetupRNG(cl, seed=rep(22681, 6) );  ## Set cluster RNG
+# clusterSetRNGStream(cl=cl, iseed=22681)
 # out <- simEmpiricalSize(cluster=cl, n=50, M=c(4,7), run.times=run.times, boot.runs=boot.run, alternative=0)
 # out <- 100*out
 # out
@@ -116,20 +116,20 @@ clusterExport(cl, ls() )
 # print(proc.time()-ptm)
 ### > print(proc.time()-ptm)
 ### user    system   elapsed 
-### 371.518     4.129 17903.346 
+### 295.902     3.088 13968.404 
 
 # counter <- 0
 # ptm <- proc.time()
-# set.seed(41682)   ## Set local RNG
-# clusterSetupRNG(cl, seed=rep(41682, 6) );  ## Set cluster RNG
+# set.seed(22681)   ## Set local RNG
+# clusterSetRNGStream(cl=cl, iseed=22681)
 # out <- simEmpiricalSize(cluster=cl, n=250, M=c(9,16), run.times=run.times, boot.runs=boot.run, alternative=0, one.way = "right")
 # out <- 100*out
 # out
 # write.csv(out, file="resultCsvFiles/n250M9and16empiricalSizeOneWayRight.csv")
 # print(proc.time()-ptm)
-### > print(proc.time()-ptm)
+## > print(proc.time()-ptm)
 ### user    system   elapsed 
-### 272.641     4.776 24037.350
+### 202.486     5.614 19659.879
 
 
 #################################
@@ -139,7 +139,7 @@ clusterExport(cl, ls() )
 # counter <- 0
 # ptm <- proc.time()
 # set.seed(41682)   ## Set local RNG
-# clusterSetupRNG(cl, seed=rep(41682, 6) );  ## Set cluster RNG
+# clusterSetRNGStream(cl=cl, iseed=41682)
 # out <- simEmpiricalSize(cluster=cl, n=100, M=c(5,8), run.times=run.times, boot.runs=boot.run, alternative=1)
 # out <- 100*out
 # out
@@ -148,12 +148,12 @@ clusterExport(cl, ls() )
 
 ### print(proc.time()-ptm)
 ### user    system   elapsed 
-### 671.660     4.492 19460.227 
+### 559.910     5.019 15612.828
 
 # counter <- 0
 # ptm <- proc.time()
 # set.seed(41682)   ## Set local RNG
-# clusterSetupRNG(cl, seed=rep(41682, 6) );  ## Set cluster RNG
+# clusterSetRNGStream(cl=cl, iseed=41682)
 # out <- simEmpiricalVARSize(cluster=cl, n=100, M=c(5,8), run.times=run.times, boot.runs=boot.run)
 # out <- 100*out
 # out
@@ -162,7 +162,7 @@ clusterExport(cl, ls() )
 
 ###> print(proc.time()-ptm)
 ###  user    system   elapsed 
-###  114.131     3.319 12869.092   
+###  94.453     2.301 12866.316 
 ### runs quicker because less parameters fit within garchFit() function
 
 ##########################################
@@ -171,7 +171,7 @@ clusterExport(cl, ls() )
 # counter <- 0
 # ptm <- proc.time()
 # set.seed(22681)   ## Set local RNG
-# clusterSetupRNG(cl, seed=rep(22681, 6) );  ## Set cluster RNG
+# clusterSetRNGStream(cl=cl, iseed=22681)
 # out <- simEmpiricalSize(cluster=cl, n=50, M=c(4,7), run.times=run.times, boot.runs=boot.run, alternative=3)
 # out <- 100*out
 # out
@@ -179,12 +179,12 @@ clusterExport(cl, ls() )
 # print(proc.time()-ptm)
 ### > print(proc.time()-ptm)
 ### user        system   elapsed 
-### 1194.409     5.625 18674.051  
+### 797.858     3.961 14439.685  
 
 # counter <- 0
 # ptm <- proc.time()
 # set.seed(41682)   ## Set local RNG
-# clusterSetupRNG(cl, seed=rep(41682, 6) );  ## Set cluster RNG
+# clusterSetRNGStream(cl=cl, iseed=41682)
 # out <- simEmpiricalSize(cluster=cl, n=250, M=c(9,16), run.times=run.times, boot.runs=boot.run, alternative=2, one.way = "right")
 # out <- 100*out
 # out
@@ -192,7 +192,7 @@ clusterExport(cl, ls() )
 # print(proc.time()-ptm)
 ### > print(proc.time()-ptm)
 ### user    system   elapsed 
-### 685.407     5.661 24302.626 
+### 463.023     5.797 19893.682 
 
 ###############################################
 ## Robustness Study
@@ -250,5 +250,6 @@ clusterExport(cl, ls() )
 ### 40.532     1.376 11091.981 
 
 stopCluster(cl);
+
 
 
